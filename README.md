@@ -42,10 +42,11 @@ bash download.sh
 ## 📋 TODO List
 
 - [ ] Non 1:1 aspect ratio implementation
-- [ ] Full evaluation code releases
+- [ ] Full evaluation code release
 - [X] Training code released
 
 ## Cite
+(Will be updated with @inproceedings of CVPR once available)
 ```bibtex
 @article{pallotta2025syncvp,
   title={SyncVP: Joint Diffusion for Synchronous Multi-Modal Video Prediction},
