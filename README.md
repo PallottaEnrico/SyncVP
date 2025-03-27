@@ -37,7 +37,7 @@ Cityscapes autoencoders and multi-modal model checkpoints can be downloaded usin
 bash download.sh
 ```
 ## Datasets
-Preprocessed version of Cityscapes at 128x128 resolution with disparity (depth) maps can be downloaded [here](https://uni-bonn.sciebo.de/s/H7ke289qsY4I3lV)
+Preprocessed version of Cityscapes at 128x128 resolution with disparity (depth) maps can be downloaded [here](https://uni-bonn.sciebo.de/s/H7ke289qsY4I3lV).
 
 ## 📋 TODO List
 
