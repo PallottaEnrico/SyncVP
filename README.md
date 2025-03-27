@@ -1,4 +1,5 @@
-# SyncVP
+<p style="text-align: center;"><h1>SyncVP</h1></p>
+
 Official implementation of **CVPR 2025** paper:
 
 **"SyncVP: Joint Diffusion for Synchronous Multi-Modal Video Prediction"**
