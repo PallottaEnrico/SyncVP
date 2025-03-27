@@ -5,9 +5,7 @@ Official implementation of **CVPR 2025** paper:
 
 > [Enrico Pallotta](https://pallottaenrico.github.io/), [Sina Mokhtarzadeh Azar](https://scholar.google.com/citations?user=kojTGo8AAAAJ&hl=en), [Shuai Li](https://derkbreeze.github.io), [Olga Zatsarynna](https://olga-zats.github.io), [Juergen Gall](https://pages.iai.uni-bonn.de/gall_juergen/)
 > 
-> 🌐 [Project](https://syncvp.github.io/)
-> 
-> [![arXiv](https://img.shields.io/badge/arXiv-2503.18933-b31b1b.svg)](https://arxiv.org/abs/2503.18933) 
+> [![arXiv](https://img.shields.io/badge/arXiv-2503.18933-b31b1b.svg)](https://arxiv.org/abs/2503.18933) [![Project Page Badge](https://img.shields.io/badge/CVPR'25-Coming%20soon-blue)]() [![Project Page Badge](https://img.shields.io/badge/Project%20Page-Visit%20Site-brightgreen)](https://syncvp.github.io/)
 > 
 
 ## How to
@@ -38,6 +36,8 @@ Cityscapes autoencoders and multi-modal model checkpoints can be downloaded usin
 ```bash
 bash download.sh
 ```
+## Datasets
+Preprocessed version of Cityscapes at 128x128 resolution with disparity (depth) maps can be downloaded [here](https://uni-bonn.sciebo.de/s/H7ke289qsY4I3lV)
 
 ## 📋 TODO List
 
