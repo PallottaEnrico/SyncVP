@@ -1,6 +1,4 @@
-<div align="center">
-# SyncVP
-</div>
+<h1 align="center"> SyncVP </h1>
 
 Official implementation of **CVPR 2025** paper:
 
