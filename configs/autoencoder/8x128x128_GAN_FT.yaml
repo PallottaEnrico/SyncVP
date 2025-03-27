@@ -1,0 +1,22 @@
+model:
+  resume: True
+  amp: True
+  base_learning_rate: 1.0e-5
+  max_iter: 50000
+  log_freq: 1000
+  eval_freq: 5000
+  eval_samples: 4
+  params:
+    embed_dim: 4
+    perceptual_weight: 4.0
+    lossconfig:
+      params:
+        disc_start: -1
+
+    ddconfig:
+      channels: 192
+      resolution: 128
+      frames: 8
+      in_channels: 3
+      out_channels: 3
+      splits: 1

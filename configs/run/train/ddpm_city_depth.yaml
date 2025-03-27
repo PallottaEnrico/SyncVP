@@ -1,0 +1,13 @@
+exp: ddpm
+id: single_mod
+data: CITYSCAPES_DEPTH
+data_folder: data
+n_gpus: 2
+batch_size: 4
+
+ae_config: configs/autoencoder/8x128x128.yaml
+ae_model: checkpoints/ae_depth_8f_cityscapes.pth
+ae_cond_config: configs/autoencoder/2x128x128.yaml
+ae_cond_model: checkpoints/ae_depth_2f_cityscapes.pth
+
+diffusion_config: configs/diffusion/128x128.yaml

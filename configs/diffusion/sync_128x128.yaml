@@ -1,0 +1,41 @@
+model:
+  base_learning_rate: 1.0e-5
+  cond_prob: 0.7
+  eval_freq: 10000
+  eval_samples : 4
+  log_freq: 1000
+  resume: False
+  max_iter: 1000000
+
+  # Multimodal sharing layers configs
+  cross_attn: 'deep'  # Use cross-attn only at deepest layer, other options are [all, none]
+  skip_conn: True  # Use skip connection
+  normalize: True  # Normalization
+
+  single_attn: True  # Compute single attention matrix for cross attention between rgb and depth
+  split_attn: True  # Apply cross attentions between spatial and temporal features independently
+
+  shared: False  # Share weights of different modalities branches (UNets)
+
+  same_noise: True  # Use same noise in the forward diffusion process (works only in predicting eps version)
+
+  modality_guidance: True  # Apply modality guidance zero-ing out rgb and depth in all possible combinations
+
+  params:
+    linear_start: 0.0015
+    linear_end: 0.0195
+    log_every_t: 200
+    timesteps: 1000
+    w: 0
+
+    unet_config:
+      image_size: 32
+      in_channels: 4
+      out_channels: 4
+      model_channels: 256
+      attention_resolutions: [4,2,1]
+      num_res_blocks: 1
+      channel_mult: [1,2]
+      num_heads: 8
+      use_scale_shift_norm: True
+      resblock_updown: True

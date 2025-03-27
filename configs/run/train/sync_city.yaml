@@ -1,0 +1,18 @@
+exp: mmddpm
+id: example
+data: CITYSCAPES_RGBD
+data_folder: data
+n_gpus: 2
+batch_size: 4
+
+ae_config: configs/autoencoder/8x128x128.yaml
+ae_cond_config: configs/autoencoder/2x128x128.yaml
+
+ae_model: checkpoints/ae_rgb_8f_cityscapes.pth
+ae_cond_model: checkpoints/ae_rgb_2f_cityscapes.pth
+ae_model_depth: checkpoints/ae_depth_8f_cityscapes.pth
+ae_cond_model_depth: checkpoints/ae_depth_2f_cityscapes.pth
+
+diffusion_config: configs/diffusion/sync_128x128.yaml
+#diffusion_rgb_model: results/ddpm_single_mod_CITY_RGB_42/ema_model_last.pth
+#diffusion_depth_model: results/ddpm_single_mod_CITY_DEPTH_42/ema_model_last.pth
