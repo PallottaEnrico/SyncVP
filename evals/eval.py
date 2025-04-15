@@ -108,7 +108,7 @@ def l2_depth(pred_depth, real_depth):
 
     return l2.cpu().numpy()
 
-def test_autoencoder(rank, model, loader, it, samples, logger=None):
+def eval_autoencoder(rank, model, loader, it, samples, logger=None):
     device = torch.device('cuda', rank)
 
     losses = dict()
@@ -180,8 +180,8 @@ def test_autoencoder(rank, model, loader, it, samples, logger=None):
     return fvd.item(), losses['ssim'].average, losses['lpips'].average, losses['psnr'].average
 
 
-def test_ddpm(rank, ema_model, ae, ae_cond, loader, it, samples=16, logger=None, frames=16, cond_frames=8,
-              trajectories=1):
+def eval_diffusion(rank, ema_model, ae, ae_cond, loader, it, samples=16, logger=None, frames=16, cond_frames=8,
+                   trajectories=1):
     device = torch.device('cuda', rank)
 
     losses = dict()
@@ -288,8 +288,8 @@ def test_ddpm(rank, ema_model, ae, ae_cond, loader, it, samples=16, logger=None,
     return fvd, losses['ssim'].average, losses['lpips'].average
 
 
-def test_mmddpm(rank, ema_model, ae_rgb, ae_depth, ae_cond_rgb, ae_cond_depth, loader, it, samples=16, logger=None,
-                frames=16, cond_frames=8, trajectories=1, w=0., no_depth_cond=False, same_noise=False):
+def eval_multimodal_diffusion(rank, ema_model, ae_rgb, ae_depth, ae_cond_rgb, ae_cond_depth, loader, it, samples=16, logger=None,
+                              frames=16, cond_frames=8, trajectories=1, w=0., no_depth_cond=False, same_noise=False):
     device = torch.device('cuda', rank)
 
     losses = dict()

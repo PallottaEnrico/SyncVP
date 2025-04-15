@@ -13,7 +13,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from tools.utils import setup_distibuted_training, setup_logger, resume_training
 
 from tools.utils import AverageMeter
-from evals.eval import test_ddpm, test_mmddpm
+from evals.eval import eval_diffusion, eval_multimodal_diffusion
 from models.ema import LitEma
 import copy
 
@@ -211,9 +211,9 @@ def diffusion_training(rank, args):
             ema.copy_to(ema_model)
             torch.save(ema_model.module.state_dict(), os.path.join(logger.logdir, f'ema_model_{it}.pth'))
             frames = args.frames + args.cond_frames
-            fvd, ssim, lpips = test_ddpm(rank, ema_model, autoencoder_model, autoencoder_cond_model,
-                                         val_loader, it, samples=args.eval_samples, logger=logger,
-                                         frames=frames, cond_frames=args.cond_frames)
+            fvd, ssim, lpips = eval_diffusion(rank, ema_model, autoencoder_model, autoencoder_cond_model,
+                                              val_loader, it, samples=args.eval_samples, logger=logger,
+                                              frames=frames, cond_frames=args.cond_frames)
             lpips *= 1000
             # Save scheduler state
             torch.save(scheduler.state_dict(), os.path.join(logger.logdir, f'scheduler_last.pth'))
@@ -448,7 +448,7 @@ def multimodal_diffusion_training(rank, args):
             torch.save(ema_model.module.state_dict(), os.path.join(logger.logdir, f'ema_model_{it}.pth'))
 
             frames = args.frames + args.cond_frames
-            fvd_rgb, fvd_depth, ssim_rgb, ssim_depth, lpips_rgb, lpips_depth, l2 = test_mmddpm(
+            fvd_rgb, fvd_depth, ssim_rgb, ssim_depth, lpips_rgb, lpips_depth, l2 = eval_multimodal_diffusion(
                 rank,
                 ema_model=ema_model,
                 ae_rgb=autoencoder_model_rgb, ae_depth=autoencoder_model_depth,

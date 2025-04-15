@@ -9,7 +9,7 @@ from models.autoencoder.autoencoder_vit import ViTAutoencoder
 from losses.perceptual import LPIPSWithDiscriminator
 from torch.cuda.amp import GradScaler, autocast
 from tools.utils import AverageMeter, setup_distibuted_training, setup_logger
-from evals.eval import test_autoencoder
+from evals.eval import eval_autoencoder
 from einops import rearrange
 import copy
 
@@ -214,7 +214,7 @@ def autoencoder_training(rank, args):
 
         if it % args.log_freq == 0:
             if it % args.eval_freq == 0:
-                fvd, ssim, lpips, psnr = test_autoencoder(rank, model, val_loader, it, args.eval_samples, logger)
+                fvd, ssim, lpips, psnr = eval_autoencoder(rank, model, val_loader, it, args.eval_samples, logger)
                 lpips *= 1000
             if logger is not None and rank == 0:
                 logger.scalar_summary('train/ae_loss', losses['ae_loss'].average, it)
