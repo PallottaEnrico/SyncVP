@@ -36,7 +36,7 @@ def get_loaders(rank, args):
         print("Using test set as default")
         pass
 
-    testset = dataset_class(data_dir, split='val', video_len=video_len, resolution=args.res, n_frames=args.frames, seed=args.seed)
+    testset = dataset_class(data_dir, split='test', video_len=video_len, resolution=args.res, n_frames=args.frames, seed=args.seed)
 
     trainset_sampler = InfiniteSampler(dataset=trainset, rank=rank, num_replicas=args.n_gpus, seed=args.seed)
     trainloader = DataLoader(trainset, sampler=trainset_sampler, batch_size=args.batch_size // args.n_gpus,
