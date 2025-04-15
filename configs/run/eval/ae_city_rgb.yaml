@@ -1,0 +1,9 @@
+exp: autoencoder
+eval: True
+id: 8frames
+data: CITYSCAPES_RGB
+data_folder: data
+batch_size: 8
+samples: 16
+ae_config: configs/autoencoder/8x128x128.yaml
+ae_model: checkpoints/ae_rgb_8f_cityscapes.pth

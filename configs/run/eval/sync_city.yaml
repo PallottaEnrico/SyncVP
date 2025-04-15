@@ -1,0 +1,18 @@
+exp: mmddpm
+eval: True
+id: complete
+data: CITYSCAPES_RGBD
+data_folder: data
+batch_size: 16
+future_frames: 28  # Future frames to predict
+
+ae_config: configs/autoencoder/8x128x128.yaml
+ae_cond_config: configs/autoencoder/2x128x128.yaml
+
+ae_model: checkpoints/ae_rgb_8f_cityscapes.pth
+ae_cond_model: checkpoints/ae_rgb_2f_cityscapes.pth
+ae_model_depth: checkpoints/ae_depth_8f_cityscapes.pth
+ae_cond_model_depth: checkpoints/ae_depth_2f_cityscapes.pth
+
+diffusion_config: configs/diffusion/sync_128x128.yaml
+diffusion_model: checkpoints/syncvp_cityscapes.pth
