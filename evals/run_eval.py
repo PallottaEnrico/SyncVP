@@ -95,7 +95,7 @@ def diffusion_eval(args):
     log_(f"Evaluation on {samples} samples with {trajectories} generated samples")
 
     fvd, ssim, lpips = eval_diffusion(0, diffusion_model, autoencoder_model, autoencoder_cond_model, test_loader, 0,
-                                      samples, logger, args.frames, args.cond_frames, trajectories)
+                                      samples, logger, args.frames, args.cond_frames, trajectories, args.ddpmconfig.w)
     log_(f"FVD: {fvd}, SSIM: {ssim}, LPIPS: {lpips * 1000}")
 
 

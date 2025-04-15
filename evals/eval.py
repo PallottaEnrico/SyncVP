@@ -181,7 +181,7 @@ def eval_autoencoder(rank, model, loader, it, samples, logger=None):
 
 
 def eval_diffusion(rank, ema_model, ae, ae_cond, loader, it, samples=16, logger=None, frames=16, cond_frames=8,
-                   trajectories=1):
+                   trajectories=1, w=0.):
     device = torch.device('cuda', rank)
 
     losses = dict()
@@ -196,7 +196,7 @@ def eval_diffusion(rank, ema_model, ae, ae_cond, loader, it, samples=16, logger=
                            channels=ema_model.module.diffusion_model.in_channels,
                            image_size=ema_model.module.diffusion_model.image_size,
                            sampling_timesteps=100,
-                           w=0.).to(device)
+                           w=w).to(device)
 
     gt_embeddings = []
     pred_embeddings = []
