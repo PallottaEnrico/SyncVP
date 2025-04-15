@@ -1,4 +1,7 @@
 import sys;
+
+from evals.run_eval import diffusion_eval, multimodal_diffusion_eval, autoencoder_eval
+
 sys.path.extend(['.'])
 
 import yaml
@@ -18,7 +21,7 @@ parser.add_argument("--config", type=str, help="Path to config file for all next
 parser.add_argument('--exp', type=str, default='ddpm', help='Type of training to run [autoencoder, ddpm, mmddpm]')
 parser.add_argument('--seed', type=int, default=42, help='random seed')
 parser.add_argument('--id', type=str, default='', help='experiment identifier')
-parser.add_argument('--n_gpus', type=int, default=2, help='Number of GPUs to use')
+parser.add_argument('--n_gpus', type=int, default=1, help='Number of GPUs to use')
 parser.add_argument('--num_workers', type=int, default=0, help='Number of workers for dataloader')
 parser.add_argument('--output', type=str, default='./results', help='Output directory where to store exp results')
 
@@ -62,6 +65,14 @@ parser.add_argument('--diffusion_depth_model', type=str, default='', help='the p
 parser.add_argument('--no_sched', action='store_true', help='load scheduler or start from new one)')
 parser.add_argument('--scale_lr', action='store_true', help='scale learning rate for batch size')
 
+""" Evaluation parameters """
+parser.add_argument('--eval', action='store_true', help='Run in evaluation mode')
+parser.add_argument('--samples', type=int, default=0, help='Number of samples to use for evaluation (0 = all)')
+parser.add_argument('--traj', type=int, default=1, help='Number of multiple trajectories to predict per sample')
+parser.add_argument('--w', type=float, default=0.0, help='Guidance parameter')
+parser.add_argument('--no_depth_cond', action='store_true', help='Predict without using past depth conditoining frames')
+parser.add_argument('--train', action='store_true', help='Evaluate on train set')
+parser.add_argument('--future_frames', type=int, default=28, help='Number of future frames to predict')
 
 def main():
     """ Additional args ends here. """
@@ -86,18 +97,30 @@ def main():
     """ RUN THE EXP """
     if args.exp == 'ddpm':
         args = ddpm_config_setup(args)
-        runner = diffusion_training
+        if args.eval:
+            runner = diffusion_eval
+        else:
+            runner = diffusion_training
     elif args.exp == 'mmddpm':
         args = mmddpm_config_setup(args)
-        runner = multimodal_diffusion_training
+        if args.eval:
+            runner = multimodal_diffusion_eval
+        else:
+            runner = multimodal_diffusion_training
     elif args.exp == 'autoencoder':
         args = autoencoder_config_setup(args)
-        runner = autoencoder_training
+        if args.eval:
+            runner = autoencoder_eval
+        else:
+            runner = autoencoder_training
     else:
         raise ValueError("Unknown experiment.")
 
-    if args.n_gpus == 1:
-        runner(rank=0, args=args)
+    if args.n_gpus == 1 or args.eval:
+        if args.eval:
+            runner(args)
+        else:
+            runner(rank=0, args=args)
     else:
         torch.multiprocessing.spawn(fn=runner, args=(args,), nprocs=args.n_gpus)
 
