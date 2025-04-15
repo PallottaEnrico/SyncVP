@@ -69,7 +69,6 @@ parser.add_argument('--scale_lr', action='store_true', help='scale learning rate
 parser.add_argument('--eval', action='store_true', help='Run in evaluation mode')
 parser.add_argument('--samples', type=int, default=0, help='Number of samples to use for evaluation (0 = all)')
 parser.add_argument('--traj', type=int, default=1, help='Number of multiple trajectories to predict per sample')
-parser.add_argument('--w', type=float, default=0.0, help='Guidance parameter')
 parser.add_argument('--no_depth_cond', action='store_true', help='Predict without using past depth conditoining frames')
 parser.add_argument('--train', action='store_true', help='Evaluate on train set')
 parser.add_argument('--future_frames', type=int, default=28, help='Number of future frames to predict')
