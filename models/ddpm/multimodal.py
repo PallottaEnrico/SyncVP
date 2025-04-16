@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch.nn import Module, ModuleList
 
-from models.ddpm.modules import SingleVideoDualCrossAttentionBlock, VideoDualCrossAttentionBlock, NoCross
+from models.ddpm.modules import SingleVideoDualCrossAttentionBlock, NoCross
 from models.ddpm.unet import UNetModel, DiffusionWrapper
 from models.ddpm.utils import timestep_embedding
 
@@ -157,7 +157,8 @@ class MultiModalUnet(Module):
         else:
             self.diff_depth = DiffusionWrapper(SingleModalityUnet(unet_config2, frames=frames))
 
-        cross_attn_block = SingleVideoDualCrossAttentionBlock if cross_attn_configs['single_attn'] else VideoDualCrossAttentionBlock
+        cross_attn_block = SingleVideoDualCrossAttentionBlock # customize this if needed
+
         if cross_attn_configs['cross_attn'] == 'deep':
             down_attn_class = NoCross
             mid_attn_class = cross_attn_block

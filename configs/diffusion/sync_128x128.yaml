@@ -12,7 +12,6 @@ model:
   skip_conn: True  # Use skip connection
   normalize: True  # Normalization
 
-  single_attn: True  # Compute single attention matrix for cross attention between rgb and depth
   split_attn: True  # Apply cross attentions between spatial and temporal features independently
 
   shared: False  # Share weights of different modalities branches (UNets)

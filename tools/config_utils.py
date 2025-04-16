@@ -62,7 +62,6 @@ def mmddpm_config_setup(args):
         'normalize': config.model.normalize if 'normalize' in config.model else False,
         'skip_conn': config.model.skip_conn if 'skip_conn' in config.model else False,
         'cross_attn': config.model.cross_attn if 'cross_attn' in config.model else 'deep',
-        'single_attn': config.model.single_attn if 'single_attn' in config.model else False,
         'split_attn': config.model.split_attn if 'split_attn' in config.model else False,
         'num_heads': config.model.num_heads if 'num_heads' in config.model else 8,
     }
