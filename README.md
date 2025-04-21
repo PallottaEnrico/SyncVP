@@ -30,8 +30,9 @@ You can either initialize this with pre-trained modality specific diffusion mode
 python3 main.py --config configs/run/train/sync_city.yaml
 ```
 ### Evaluation
-Coming soon ...
-
+```bash
+python3 main.py --config configs/run/eval/sync_city.yaml
+```
 ## Model checkpoints
 Cityscapes autoencoders and multi-modal model checkpoints can be downloaded using:
 ```bash
