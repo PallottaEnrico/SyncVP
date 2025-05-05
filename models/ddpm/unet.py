@@ -134,7 +134,11 @@ class UNetModel(nn.Module):
         self.num_heads_upsample = num_heads_upsample
         self.predict_codebook_ids = n_embed is not None
         self.frames = frames
-        self.ae_emb_dim = (image_size * image_size) + (frames * image_size) + (frames * image_size)
+        if isinstance(self.image_size, int):
+            self.ae_emb_dim = (image_size * image_size) + (frames * image_size) + (frames * image_size)
+        else:
+            self.ae_emb_dim = (image_size[0] * image_size[1]) + (frames * image_size[0]) + (frames * image_size[1])
+
         self.register_buffer("zeros", torch.zeros(1, self.in_channels, self.ae_emb_dim))
 
         time_embed_dim = model_channels * 4
@@ -400,14 +404,18 @@ class UNetModel(nn.Module):
             h = torch.cat([h, self.zeros.repeat(h.size(0), 1, 1)], dim=1)
 
         # define res1, res2 and t to split latent vector h into 3 parts
-        # TODO: add implementation for non-squared resolution
-        res1 = self.image_size
-        res2 = self.image_size
-        t = self.frames
+        if isinstance(self.image_size, int):
+            res1 = self.image_size
+            res2 = self.image_size
+        else:
+            res1 = self.image_size[0]
+            res2 = self.image_size[1]
+        t = self.timesteps
+
 
         h_xy = h[:, :, 0:res1*res2].view(h.size(0), h.size(1), res1, res2)
-        h_yt = h[:, :, res1*res2:res1*(res2+t)].view(h.size(0), h.size(1), t, res1)
-        h_xt = h[:, :, res1*(res2+t):res1*(res2+t+t)].view(h.size(0), h.size(1), t, res1)
+        h_yt = h[:, :, res1*res2:res2*(res1+t)].view(h.size(0), h.size(1), t, res2)
+        h_xt = h[:, :, res2*(res1+t):res2*(res1+t)+res1*t].view(h.size(0), h.size(1), t, res1)
 
         for module, input_attn in zip(self.input_blocks, self.input_attns):
             h_xy = module(h_xy, emb, context)
@@ -425,9 +433,9 @@ class UNetModel(nn.Module):
             h = torch.cat([h_xy, h_yt, h_xt], dim=-1)
             h = input_attn(h)
 
-            h_xy = h[:, :, 0:res1*res2].view(h.size(0), h.size(1), res1, res2)
-            h_yt = h[:, :, res1*res2:res1*(res2+t)].view(h.size(0), h.size(1), t, res1)
-            h_xt = h[:, :, res1*(res2+t):res1*(res2+t+t)].view(h.size(0), h.size(1), t, res1)
+            h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res1, res2)
+            h_yt = h[:, :, res1 * res2:res2 * (res1 + t)].view(h.size(0), h.size(1), t, res2)
+            h_xt = h[:, :, res2 * (res1 + t):res2 * (res1 + t) + res1 * t].view(h.size(0), h.size(1), t, res1)
 
             h_xys.append(h_xy)
             h_yts.append(h_yt)
@@ -448,9 +456,9 @@ class UNetModel(nn.Module):
         h = torch.cat([h_xy, h_yt, h_xt], dim=-1)
         h = self.mid_attn(h)
 
-        h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res1, res2)
-        h_yt = h[:, :, res1 * res2:res1 * (res2 + t)].view(h.size(0), h.size(1), t, res1)
-        h_xt = h[:, :, res1 * (res2 + t):res1 * (res2 + t + t)].view(h.size(0), h.size(1), t, res1)
+        h_xy = h[:, :, 0:res1*res2].view(h.size(0), h.size(1), res1, res2)
+        h_yt = h[:, :, res1*res2:res2*(res1+t)].view(h.size(0), h.size(1), t, res2)
+        h_xt = h[:, :, res2*(res1+t):res2*(res1+t)+res1*t].view(h.size(0), h.size(1), t, res1)
 
         for module, output_attn in zip(self.output_blocks, self.output_attns):
             h_xy = th.cat([h_xy, h_xys.pop()], dim=1)
@@ -479,8 +487,8 @@ class UNetModel(nn.Module):
             h = output_attn(h)
 
             h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res1, res2)
-            h_yt = h[:, :, res1 * res2:res1 * (res2 + t)].view(h.size(0), h.size(1), t, res1)
-            h_xt = h[:, :, res1 * (res2 + t):res1 * (res2 + t + t)].view(h.size(0), h.size(1), t, res1)
+            h_yt = h[:, :, res1 * res2:res2 * (res1 + t)].view(h.size(0), h.size(1), t, res2)
+            h_xt = h[:, :, res2 * (res1 + t):res2 * (res1 + t) + res1 * t].view(h.size(0), h.size(1), t, res1)
 
         h_xy = self.out(h_xy)
         h_yt = self.out(h_yt)
