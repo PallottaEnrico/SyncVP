@@ -88,33 +88,41 @@ class ViTAutoencoder(nn.Module):
         self.splits = ddconfig["splits"]
         self.s = ddconfig["frames"] // self.splits
 
-        self.res = ddconfig["resolution"]
+        if isinstance(ddconfig["resolution"], int):
+            self.res_h = ddconfig["resolution"]
+            self.res_w = ddconfig["resolution"]
+        else:
+            self.res_h = ddconfig["resolution"][0]
+            self.res_w = ddconfig["resolution"][1]
+
         self.embed_dim = embed_dim
         self.image_key = image_key
 
         patch_size = 8
         self.down = 3
-        if self.res == 128 or self.res == 64:
+
+        max_res = self.res_h if self.res_h > self.res_w else self.res_w
+        if max_res == 128 or max_res == 64:
             patch_size = 4
             self.down = 2
 
         self.encoder = TimeSformerEncoder(dim=ddconfig["channels"],
-                                          image_size=ddconfig["resolution"],
+                                          image_size=max_res,
                                           num_frames=ddconfig["frames"],
                                           channels=ddconfig["in_channels"],
                                           depth=ddconfig["layers"] if "layers" in ddconfig else 8,
                                           patch_size=patch_size)
 
         self.decoder = TimeSformerDecoder(dim=ddconfig["channels"],
-                                          image_size=ddconfig["resolution"],
+                                          image_size=max_res,
                                           num_frames=ddconfig["frames"],
                                           channels=ddconfig["in_channels"],
                                           depth=ddconfig["layers"] if "layers" in ddconfig else 8,
                                           patch_size=patch_size)
 
         self.to_pixel = nn.Sequential(
-            Rearrange('b (t h w) c -> (b t) c h w', h=self.res // patch_size, w=self.res // patch_size),
-            nn.ConvTranspose2d(ddconfig["channels"], ddconfig["out_channels"], kernel_size=(patch_size, patch_size),
+            Rearrange('b (t h w) c -> (b t) c h w', h=self.res_h // patch_size, w=self.res_w // patch_size),
+            nn.ConvTranspose2d(ddconfig["channels"], ddconfig["out_ch"], kernel_size=(patch_size, patch_size),
                                stride=patch_size),
         )
 
@@ -127,8 +135,8 @@ class ViTAutoencoder(nn.Module):
         self.yt_token = nn.Parameter(torch.randn(1, 1, ddconfig["channels"]))
 
         self.xy_pos_embedding = nn.Parameter(torch.randn(1, self.s + 1, ddconfig["channels"]))
-        self.xt_pos_embedding = nn.Parameter(torch.randn(1, self.res // (2 ** self.down) + 1, ddconfig["channels"]))
-        self.yt_pos_embedding = nn.Parameter(torch.randn(1, self.res // (2 ** self.down) + 1, ddconfig["channels"]))
+        self.xt_pos_embedding = nn.Parameter(torch.randn(1, self.res_w // (2 ** self.down) + 1, ddconfig["channels"]))
+        self.yt_pos_embedding = nn.Parameter(torch.randn(1, self.res_h // (2 ** self.down) + 1, ddconfig["channels"]))
 
         self.xy_quant_attn = Transformer(ddconfig["channels"], 4, 4, ddconfig["channels"] // 8, 512)
         self.yt_quant_attn = Transformer(ddconfig["channels"], 4, 4, ddconfig["channels"] // 8, 512)
@@ -147,7 +155,7 @@ class ViTAutoencoder(nn.Module):
         b = x.size(0)
         x = rearrange(x, 'b c t h w -> b t c h w')
         h = self.encoder(x)
-        h = rearrange(h, 'b (t h w) c -> b c t h w', t=self.s, h=self.res // (2 ** self.down))
+        h = rearrange(h, 'b (t h w) c -> b c t h w', t=self.s, h=self.res_h // (2 ** self.down))
 
         h_xy = rearrange(h, 'b c t h w -> (b h w) t c')
         n = h_xy.size(1)
@@ -155,7 +163,7 @@ class ViTAutoencoder(nn.Module):
         h_xy = torch.cat([h_xy, xy_token], dim=1)
         h_xy += self.xy_pos_embedding[:, :(n + 1)]
         h_xy = self.xy_quant_attn(h_xy)[:, 0]
-        h_xy = rearrange(h_xy, '(b h w) c -> b c h w', b=b, h=self.res // (2 ** self.down))
+        h_xy = rearrange(h_xy, '(b h w) c -> b c h w', b=b, h=self.res_h // (2 ** self.down))
 
         h_yt = rearrange(h, 'b c t h w -> (b t w) h c')
         n = h_yt.size(1)
@@ -163,7 +171,7 @@ class ViTAutoencoder(nn.Module):
         h_yt = torch.cat([h_yt, yt_token], dim=1)
         h_yt += self.yt_pos_embedding[:, :(n + 1)]
         h_yt = self.yt_quant_attn(h_yt)[:, 0]
-        h_yt = rearrange(h_yt, '(b t w) c -> b c t w', b=b, w=self.res // (2 ** self.down))
+        h_yt = rearrange(h_yt, '(b t w) c -> b c t w', b=b, w=self.res_w // (2 ** self.down))
 
         h_xt = rearrange(h, 'b c t h w -> (b t h) w c')
         n = h_xt.size(1)
@@ -171,7 +179,7 @@ class ViTAutoencoder(nn.Module):
         h_xt = torch.cat([h_xt, xt_token], dim=1)
         h_xt += self.xt_pos_embedding[:, :(n + 1)]
         h_xt = self.xt_quant_attn(h_xt)[:, 0]
-        h_xt = rearrange(h_xt, '(b t h) c -> b c t h', b=b, h=self.res // (2 ** self.down))
+        h_xt = rearrange(h_xt, '(b t h) c -> b c t h', b=b, h=self.res_h // (2 ** self.down))
 
         h_xy = self.pre_xy(h_xy)
         h_yt = self.pre_yt(h_yt)
@@ -186,8 +194,8 @@ class ViTAutoencoder(nn.Module):
         h_xt = self.post_xt(h_xt)
 
         h_xy = h_xy.unsqueeze(-3).expand(-1, -1, self.s, -1, -1)
-        h_yt = h_yt.unsqueeze(-2).expand(-1, -1, -1, self.res // (2 ** self.down), -1)
-        h_xt = h_xt.unsqueeze(-1).expand(-1, -1, -1, -1, self.res // (2 ** self.down))
+        h_yt = h_yt.unsqueeze(-2).expand(-1, -1, -1, self.res_h // (2 ** self.down), -1)
+        h_xt = h_xt.unsqueeze(-1).expand(-1, -1, -1, -1, self.res_w // (2 ** self.down))
 
         return h_xy + h_yt + h_xt  # torch.cat([h_xy, h_yt, h_xt], dim=1)
 
@@ -205,7 +213,7 @@ class ViTAutoencoder(nn.Module):
         b = x.size(0)
         x = rearrange(x, 'b c t h w -> b t c h w')
         h = self.encoder(x)
-        h = rearrange(h, 'b (t h w) c -> b c t h w', t=self.s, h=self.res // (2 ** self.down))
+        h = rearrange(h, 'b (t h w) c -> b c t h w', t=self.s, h=self.res_h // (2 ** self.down))
 
         h_xy = rearrange(h, 'b c t h w -> (b h w) t c')
         n = h_xy.size(1)
@@ -213,7 +221,7 @@ class ViTAutoencoder(nn.Module):
         h_xy = torch.cat([h_xy, xy_token], dim=1)
         h_xy += self.xy_pos_embedding[:, :(n + 1)]
         h_xy = self.xy_quant_attn(h_xy)[:, 0]
-        h_xy = rearrange(h_xy, '(b h w) c -> b c h w', b=b, h=self.res // (2 ** self.down))
+        h_xy = rearrange(h_xy, '(b h w) c -> b c h w', b=b, h=self.res_h // (2 ** self.down))
 
         h_yt = rearrange(h, 'b c t h w -> (b t w) h c')
         n = h_yt.size(1)
@@ -221,7 +229,7 @@ class ViTAutoencoder(nn.Module):
         h_yt = torch.cat([h_yt, yt_token], dim=1)
         h_yt += self.yt_pos_embedding[:, :(n + 1)]
         h_yt = self.yt_quant_attn(h_yt)[:, 0]
-        h_yt = rearrange(h_yt, '(b t w) c -> b c t w', b=b, w=self.res // (2 ** self.down))
+        h_yt = rearrange(h_yt, '(b t w) c -> b c t w', b=b, w=self.res_w // (2 ** self.down))
 
         h_xt = rearrange(h, 'b c t h w -> (b t h) w c')
         n = h_xt.size(1)
@@ -229,7 +237,7 @@ class ViTAutoencoder(nn.Module):
         h_xt = torch.cat([h_xt, xt_token], dim=1)
         h_xt += self.xt_pos_embedding[:, :(n + 1)]
         h_xt = self.xt_quant_attn(h_xt)[:, 0]
-        h_xt = rearrange(h_xt, '(b t h) c -> b c t h', b=b, h=self.res // (2 ** self.down))
+        h_xt = rearrange(h_xt, '(b t h) c -> b c t h', b=b, h=self.res_h // (2 ** self.down))
 
         h_xy = self.pre_xy(h_xy)
         h_yt = self.pre_yt(h_yt)
@@ -247,22 +255,23 @@ class ViTAutoencoder(nn.Module):
         return ret
 
     def decode_from_sample(self, h):
-        latent_res = self.res // (2 ** self.down)
-        h_xy = h[:, :, 0:latent_res * latent_res].view(h.size(0), h.size(1), latent_res, latent_res)
-        h_yt = h[:, :, latent_res * latent_res:latent_res * (latent_res + self.s)].view(h.size(0), h.size(1), self.s,
-                                                                                        latent_res)
-        h_xt = h[:, :, latent_res * (latent_res + self.s):latent_res * (latent_res + self.s + self.s)].view(h.size(0),
-                                                                                                            h.size(1),
-                                                                                                            self.s,
-                                                                                                            latent_res)
+        res1 = self.res_w // (2 ** self.down)
+        res2 = self.res_h // (2 ** self.down)
+
+        if res1 > res2:
+            res1, res2 = res2, res1
+
+        h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res2, res1)
+        h_yt = h[:, :, res1 * res2:res1 * (res2 + self.s)].view(h.size(0), h.size(1), self.s, res1)
+        h_xt = h[:, :, res1 * (res2 + self.s):res2 * (res1 + self.s + self.s)].view(h.size(0), h.size(1), self.s, res2)
 
         h_xy = self.post_xy(h_xy)
         h_yt = self.post_yt(h_yt)
         h_xt = self.post_xt(h_xt)
 
-        h_xy = h_xy.unsqueeze(-3).expand(-1, -1, self.s, -1, -1)
-        h_yt = h_yt.unsqueeze(-2).expand(-1, -1, -1, latent_res, -1)
-        h_xt = h_xt.unsqueeze(-1).expand(-1, -1, -1, -1, latent_res)
+        h_xy = h_xy.unsqueeze(-3).expand(-1,-1,self.s,-1, -1)
+        h_yt = h_yt.unsqueeze(-2).expand(-1,-1,-1,res2, -1)
+        h_xt = h_xt.unsqueeze(-1).expand(-1,-1,-1,-1,res1)
 
         z = h_xy + h_yt + h_xt
 
