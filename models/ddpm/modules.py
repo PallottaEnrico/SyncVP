@@ -495,21 +495,26 @@ class SingleVideoDualCrossAttentionBlock(nn.Module):
 
         self.split_attn = kwargs['split_attn']
 
+        # Mapping from latent size to spatial and temporal dimensions
         self.shapes = {
-            2048: (32, 16),
-            1536: (32, 8),
-            512: (16, 8),
-            384: (16, 4),
-            128: (8, 4),
-            32: (4, 2),
+            2704: (64, 36, 2),
+            2048: (32, 32, 16),
+            1856: (32, 48, 4),
+            1536: (32, 32, 8),
+            676: (32, 18, 1),
+            512: (16, 16, 8),
+            464: (16, 24, 2),
+            384: (16, 16, 4),
+            232: (8, 12, 1),
+            128: (8, 8, 4),
+            32: (4, 4, 2),
         }
 
     def forward(self, x, y):
         if self.split_attn:
-            # TODO: add implementation for non-squared resolution
-            spatial_dim, temporal_dim = self.shapes[x.size(2)]
-            spatial = spatial_dim ** 2
-            temporal = spatial + spatial_dim * temporal_dim
+            res1, res2, temporal_dim = self.shapes[x.size(2)]
+            spatial = res1 * res2
+            temporal = res2 * (res1 + temporal_dim)
 
             x = [x[:, :, :spatial], x[:, :, spatial:temporal], x[:, :, temporal:]]
             y = [y[:, :, :spatial], y[:, :, spatial:temporal], y[:, :, temporal:]]

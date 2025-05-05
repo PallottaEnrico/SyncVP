@@ -52,14 +52,17 @@ class SingleModalityUnet(UNetModel):
             h = torch.cat([h, self.zeros.repeat(h.size(0), 1, 1)], dim=1)
 
         # define res1, res2 and t to split latent vector h into 3 parts
-        # TODO: add implementation for non-squared resolution
-        res1 = self.image_size
-        res2 = self.image_size
-        t = self.frames
+        if isinstance(self.image_size, int):
+            res1 = self.image_size
+            res2 = self.image_size
+        else:
+            res1 = self.image_size[0]
+            res2 = self.image_size[1]
+        t = self.timesteps
 
         h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res1, res2)
-        h_yt = h[:, :, res1 * res2:res1 * (res2 + t)].view(h.size(0), h.size(1), t, res1)
-        h_xt = h[:, :, res1 * (res2 + t):res1 * (res2 + t + t)].view(h.size(0), h.size(1), t, res1)
+        h_yt = h[:, :, res1 * res2:res2 * (res1 + t)].view(h.size(0), h.size(1), t, res2)
+        h_xt = h[:, :, res2 * (res1 + t):res2 * (res1 + t) + res1 * t].view(h.size(0), h.size(1), t, res1)
 
         for module, input_attn in zip(self.input_blocks, self.input_attns):
             h_xy = module(h_xy, emb, context)
@@ -68,7 +71,7 @@ class SingleModalityUnet(UNetModel):
 
             res1 = h_xy.size(-2)
             res2 = h_xy.size(-1)
-            t = h_xt.size(-2)
+            t    = h_xt.size(-2)
 
             h_xy = h_xy.view(h_xy.size(0), h_xy.size(1), -1)
             h_yt = h_yt.view(h_yt.size(0), h_yt.size(1), -1)
@@ -80,8 +83,8 @@ class SingleModalityUnet(UNetModel):
             h = yield h
 
             h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res1, res2)
-            h_yt = h[:, :, res1 * res2:res1 * (res2 + t)].view(h.size(0), h.size(1), t, res1)
-            h_xt = h[:, :, res1 * (res2 + t):res1 * (res2 + t + t)].view(h.size(0), h.size(1), t, res1)
+            h_yt = h[:, :, res1 * res2:res2 * (res1 + t)].view(h.size(0), h.size(1), t, res2)
+            h_xt = h[:, :, res2 * (res1 + t):res2 * (res1 + t) + res1 * t].view(h.size(0), h.size(1), t, res1)
 
             h_xys.append(h_xy)
             h_yts.append(h_yt)
@@ -93,7 +96,7 @@ class SingleModalityUnet(UNetModel):
 
         res1 = h_xy.size(-2)
         res2 = h_xy.size(-1)
-        t = h_xt.size(-2)
+        t    = h_xt.size(-2)
 
         h_xy = h_xy.view(h_xy.size(0), h_xy.size(1), -1)
         h_yt = h_yt.view(h_yt.size(0), h_yt.size(1), -1)
@@ -105,8 +108,8 @@ class SingleModalityUnet(UNetModel):
         h = yield h
 
         h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res1, res2)
-        h_yt = h[:, :, res1 * res2:res1 * (res2 + t)].view(h.size(0), h.size(1), t, res1)
-        h_xt = h[:, :, res1 * (res2 + t):res1 * (res2 + t + t)].view(h.size(0), h.size(1), t, res1)
+        h_yt = h[:, :, res1 * res2:res2 * (res1 + t)].view(h.size(0), h.size(1), t, res2)
+        h_xt = h[:, :, res2 * (res1 + t):res2 * (res1 + t) + res1 * t].view(h.size(0), h.size(1), t, res1)
 
         for module, output_attn in zip(self.output_blocks, self.output_attns):
             h_xy = torch.cat([h_xy, h_xys.pop()], dim=1)
@@ -118,7 +121,7 @@ class SingleModalityUnet(UNetModel):
 
             res1 = h_xy.size(-2)
             res2 = h_xy.size(-1)
-            t = h_xt.size(-2)
+            t   = h_xt.size(-2)
 
             h_xy = h_xy.view(h_xy.size(0), h_xy.size(1), -1)
             h_yt = h_yt.view(h_yt.size(0), h_yt.size(1), -1)
@@ -130,8 +133,8 @@ class SingleModalityUnet(UNetModel):
             h = yield h
 
             h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res1, res2)
-            h_yt = h[:, :, res1 * res2:res1 * (res2 + t)].view(h.size(0), h.size(1), t, res1)
-            h_xt = h[:, :, res1 * (res2 + t):res1 * (res2 + t + t)].view(h.size(0), h.size(1), t, res1)
+            h_yt = h[:, :, res1 * res2:res2 * (res1 + t)].view(h.size(0), h.size(1), t, res2)
+            h_xt = h[:, :, res2 * (res1 + t):res2 * (res1 + t) + res1 * t].view(h.size(0), h.size(1), t, res1)
 
         h_xy = self.out(h_xy)
         h_yt = self.out(h_yt)
