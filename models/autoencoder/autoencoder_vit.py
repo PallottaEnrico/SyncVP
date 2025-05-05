@@ -255,25 +255,24 @@ class ViTAutoencoder(nn.Module):
         return ret
 
     def decode_from_sample(self, h):
-        res1 = self.res_w // (2 ** self.down)
-        res2 = self.res_h // (2 ** self.down)
 
-        if res1 > res2:
-            res1, res2 = res2, res1
+        res1 = self.res_h // (2**self.down)
+        res2 = self.res_w // (2**self.down)
 
-        h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res2, res1)
-        h_yt = h[:, :, res1 * res2:res1 * (res2 + self.s)].view(h.size(0), h.size(1), self.s, res1)
-        h_xt = h[:, :, res1 * (res2 + self.s):res2 * (res1 + self.s + self.s)].view(h.size(0), h.size(1), self.s, res2)
+        h_xy = h[:, :, 0:res1*res2].view(h.size(0), h.size(1), res1, res2)
+        h_yt = h[:, :, res1*res2:res2*(res1+self.s)].view(h.size(0), h.size(1), self.s, res2)
+        h_xt = h[:, :, res2*(res1+self.s):res2*(res1+self.s)+res1*self.s].view(h.size(0), h.size(1), self.s, res1)
 
         h_xy = self.post_xy(h_xy)
         h_yt = self.post_yt(h_yt)
         h_xt = self.post_xt(h_xt)
 
         h_xy = h_xy.unsqueeze(-3).expand(-1,-1,self.s,-1, -1)
-        h_yt = h_yt.unsqueeze(-2).expand(-1,-1,-1,res2, -1)
-        h_xt = h_xt.unsqueeze(-1).expand(-1,-1,-1,-1,res1)
+        h_yt = h_yt.unsqueeze(-2).expand(-1,-1,-1,res1, -1)
+        h_xt = h_xt.unsqueeze(-1).expand(-1,-1,-1,-1,res2)
 
         z = h_xy + h_yt + h_xt
 
+        b = z.size(0)
         dec = self.decoder(z)
-        return 2 * self.act(self.to_pixel(dec)).contiguous() - 1
+        return 2*self.act(self.to_pixel(dec)).contiguous()-1
