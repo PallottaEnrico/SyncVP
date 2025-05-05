@@ -43,7 +43,7 @@ Preprocessed version of Cityscapes at 128x128 resolution with disparity (depth) 
 
 ## 📋 TODO List
 
-- [ ] Non 1:1 aspect ratio implementation
+- [X] Non 1:1 aspect ratio implementation
 - [X] Full evaluation code release
 - [X] Training code released
 
