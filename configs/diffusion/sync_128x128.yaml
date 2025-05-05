@@ -28,7 +28,7 @@ model:
     w: 0
 
     unet_config:
-      image_size: 32
+      image_size: 32 # Latent dimension; for non-square images set a tuple [h, w] (e.g. image_size: [16, 32])
       in_channels: 4
       out_channels: 4
       model_channels: 256
