@@ -6,7 +6,7 @@ Official implementation of **CVPR 2025** paper:
 
 > [Enrico Pallotta](https://pallottaenrico.github.io/), [Sina Mokhtarzadeh Azar](https://scholar.google.com/citations?user=kojTGo8AAAAJ&hl=en), [Shuai Li](https://derkbreeze.github.io), [Olga Zatsarynna](https://olga-zats.github.io), [Juergen Gall](https://pages.iai.uni-bonn.de/gall_juergen/)
 > 
-> [![arXiv](https://img.shields.io/badge/arXiv-2503.18933-b31b1b.svg)](https://arxiv.org/abs/2503.18933) [![Project Page Badge](https://img.shields.io/badge/CVPR'25-Coming%20soon-blue)]() [![Project Page Badge](https://img.shields.io/badge/Project%20Page-Visit%20Site-brightgreen)](https://syncvp.github.io/)
+> [![arXiv](https://img.shields.io/badge/arXiv-2503.18933-b31b1b.svg)](https://arxiv.org/abs/2503.18933) [![Project Page Badge](https://img.shields.io/badge/CVPR'25-Official%20paper-blue)](https://openaccess.thecvf.com/content/CVPR2025/papers/Pallotta_SyncVP_Joint_Diffusion_for_Synchronous_Multi-Modal_Video_Prediction_CVPR_2025_paper.pdf) [![Project Page Badge](https://img.shields.io/badge/Project%20Page-Visit%20Site-brightgreen)](https://syncvp.github.io/)
 > 
 
 ## How to
