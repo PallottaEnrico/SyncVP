@@ -48,13 +48,14 @@ Preprocessed version of Cityscapes at 128x128 resolution with disparity (depth) 
 - [X] Training code released
 
 ## Cite
-(Will be updated with @inproceedings of CVPR once available)
 ```bibtex
-@article{pallotta2025syncvp,
-  title={SyncVP: Joint Diffusion for Synchronous Multi-Modal Video Prediction},
-  author={Pallotta, Enrico and Azar, Sina Mokhtarzadeh and Li, Shuai and Zatsarynna, Olga and Gall, Juergen},
-  journal={arXiv preprint arXiv:2503.18933},
-  year={2025}
+@InProceedings{Pallotta_2025_CVPR,
+    author    = {Pallotta, Enrico and Azar, Sina Mokhtarzadeh and Li, Shuai and Zatsarynna, Olga and Gall, Juergen},
+    title     = {SyncVP: Joint Diffusion for Synchronous Multi-Modal Video Prediction},
+    booktitle = {Proceedings of the Computer Vision and Pattern Recognition Conference (CVPR)},
+    month     = {June},
+    year      = {2025},
+    pages     = {13787-13797}
 }
 ```
 
