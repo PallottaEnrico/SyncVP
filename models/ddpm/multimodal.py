@@ -58,7 +58,7 @@ class SingleModalityUnet(UNetModel):
         else:
             res1 = self.image_size[0]
             res2 = self.image_size[1]
-        t = self.timesteps
+        t = self.frames
 
         h_xy = h[:, :, 0:res1 * res2].view(h.size(0), h.size(1), res1, res2)
         h_yt = h[:, :, res1 * res2:res2 * (res1 + t)].view(h.size(0), h.size(1), t, res2)

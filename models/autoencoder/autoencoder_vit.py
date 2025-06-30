@@ -122,7 +122,7 @@ class ViTAutoencoder(nn.Module):
 
         self.to_pixel = nn.Sequential(
             Rearrange('b (t h w) c -> (b t) c h w', h=self.res_h // patch_size, w=self.res_w // patch_size),
-            nn.ConvTranspose2d(ddconfig["channels"], ddconfig["out_ch"], kernel_size=(patch_size, patch_size),
+            nn.ConvTranspose2d(ddconfig["channels"], ddconfig["out_channels"], kernel_size=(patch_size, patch_size),
                                stride=patch_size),
         )
 
