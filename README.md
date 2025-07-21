@@ -36,7 +36,7 @@ python3 main.py --config configs/run/eval/sync_city.yaml
 ## Model checkpoints
 Cityscapes autoencoders and multi-modal model checkpoints can be downloaded using:
 ```bash
-bash download.sh
+bash download.sh <dataset_name>
 ```
 ## Datasets
 Preprocessed version of Cityscapes at 128x128 resolution with disparity (depth) maps can be downloaded [here](https://uni-bonn.sciebo.de/s/H7ke289qsY4I3lV).
